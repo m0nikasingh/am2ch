@@ -1,13 +1,10 @@
-FROM grafana/grafana:9.0.5-ubuntu
+FROM grafana/grafana:10.2.3-ubuntu
 
 WORKDIR /tmp
 USER root
 
-RUN curl -vkL https://github.com/grafana/clickhouse-datasource/releases/download/v1.1.2/grafana-clickhouse-datasource-1.1.2.linux_amd64.zip -o grafana-clickhouse-datasource-1.1.2.linux_amd64.zip
-
-RUN apt-get update && apt-get install -y unzip && \
-    unzip grafana-clickhouse-datasource-1.1.2.linux_amd64.zip -d /var/lib/grafana/plugins/
+RUN grafana cli plugins install grafana-clickhouse-datasource
 
 RUN mkdir -p /var/lib/grafana/dashboards
 
-COPY dashboards/demo.json  /var/lib/grafana/dashboards/
+COPY dashboards/*.json  /var/lib/grafana/dashboards/

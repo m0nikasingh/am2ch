@@ -67,3 +67,23 @@ ENGINE = MergeTree
 PARTITION BY toStartOfHour(datetime)
 ORDER BY labels.alertname
 SETTINGS index_granularity = 8192;' | clickhouse-client
+
+echo -n '
+CREATE TABLE r0.silences
+(
+    `date` Date DEFAULT toDate(now()),
+    `datetime` DateTime DEFAULT now(),
+    `id` String,
+    `status.state` LowCardinality(String),
+    `updatedAt` DateTime64(3),
+    `startsAt` DateTime64(3),
+    `createdBy` LowCardinality(String),
+    `endsAt` DateTime64(3),
+    `matchers` Map(String, String),
+    `comment` String
+)
+ENGINE = ReplacingMergeTree
+PARTITION BY toStartOfHour(datetime)
+ORDER BY (id, startsAt, endsAt)
+SETTINGS index_granularity = 8192;
+' | clickhouse-client

@@ -1,26 +1,30 @@
-# am2ch
+# DIY alert analysis
 
-am2ch runs vector.dev instance as a HTTP server, receives HTTP webhook notifications from AlertManager and inserts them into ClickHouse
+This demo uses `vector.dev` to collect data from different sources and write the data in the datastore
+we use one `http_server` vector instance - to receive Alertmanager webhook notifications,
+two `http_client` sources to query Alertmanager's alerts and silence API endpoints and
+two `sinks` for writing all the state logs in ClickHouse into `alerts` and `silences` tables.
 
-This demo collects alert details from Alertmanager, transforms the data using vector.dev and writes it in the datastore for analytics.
+The docker-compose will bring up several containers:
 
-The docker-compose would spawn up 7 containers:
+* `Cadvisor` is used to generate system metrics for monitoring.
+* `Prometheus` is used to monitor and generate alerts.
+* `Alertmanager` is to route alerts and provide the alert events via webhook and API.
+* `alertmanager_silence` is to create an Alertmanager silence.
+* `blackbox_exporter` is for monitoring the sites and generating alerts.
+* `ClickHouse` is used to write the Alertmanager alert events into the datastore for alert analysis.
+* `Vector.dev` - to collect data from Alertmanager webhook, alerts and silences API, transform the data and write into ClickHouse.
+* `Grafana` is used to visualize the logs.
 
-* cadvisor - for generating system metrics for monitoring
-* prometheus - to monitor and generate alert
-* alertmanager - to route alerts and provide the alert events via webhook and API
-* blackbox_exporter - for monitoring the sites and generate alerts
-* clickhouse - to write the alertmanager alert events into the datastore for alert anaytics
-* Vector.dev - to collect data from alertmanager webhook, alerts api and silences api, transform the data and write into ClickHouse.
-* Grafana - to visualize the logs
+## Pre-requisite:
+`docker`
 
-Pre-requisite:
-
-docker
-Getting started:
+## Getting started:
 
 Bring up the containers using docker compose
-
 ```docker compose up```
-And visit http://localhost:3000/ and open the Demo dashboard, play around.
-This is a very basic dashboard.
+
+Please wait for about 5 minutes for the alerts to be triggered and
+visit http://localhost:3000/ to explore the `Alerts and silences overview` dashboard and play around.
+
+![alerts and silences overview](images/alerts-silences-overview.png "alerts and silences overview")
