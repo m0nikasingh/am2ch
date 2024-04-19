@@ -1,6 +1,11 @@
 # DIY alert analysis
 
-This demo uses `vector.dev` to collect data from different sources and write the data in the datastore
+Alert analysis tool gathers alerts from webhook and Alertmanager API, stores it in ClickHouse database and 
+provides dashboards for analyzing the data.
+Please refer to [Cloudflare Blog](https://blog.cloudflare.com/alerts-observability) for insights and experiences 
+and [PromCon 2023 in Berlin](https://promcon.io/2023-berlin/talks/alert-analytics/) for the talk presentation.
+
+This demo uses `vector.dev` to collect data from different sources and write the data in the datastore.
 we use one `http_server` vector instance - to receive Alertmanager webhook notifications,
 two `http_client` sources to query Alertmanager's alerts and silence API endpoints and
 two `sinks` for writing all the state logs in ClickHouse into `alerts` and `silences` tables.
