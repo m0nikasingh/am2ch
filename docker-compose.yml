@@ -6,8 +6,21 @@ volumes:
 
 services:
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 8080:8080
+    restart: always
+    deploy:
+      mode: global
+
   prometheus:
-    image: prom/prometheus:v2.0.0
+    image: prom/prometheus:v2.49.1
     volumes:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
@@ -29,34 +42,32 @@ services:
       mode: global
 
   alertmanager:
-    image: prom/alertmanager:v0.25.0
+    image: prom/alertmanager:v0.26.0
     ports:
       - 9093:9093
     volumes:
       - ./alertmanager/:/etc/alertmanager/
       - ./alertmanager/amtool:/bin/amtool
-      #- ./alertmanager/alertmanager:/bin/alertmanager
     restart: always
     command:
       - '--config.file=/etc/alertmanager/config.yml'
     deploy:
       mode: global
 
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor
+  alertmanager_silence:
+    image: prom/alertmanager:v0.26.0
     volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    ports:
-      - 8080:8080
-    restart: always
-    deploy:
-      mode: global
+      - ./alertmanager/:/etc/alertmanager/
+      - ./alertmanager/amtool:/bin/amtool
+      - ./alertmanager/silence_entrypoint.sh:/silence_entrypoint.sh
+    depends_on:
+      alertmanager:
+        condition: service_started
+    restart: 'no'
+    entrypoint: '/silence_entrypoint.sh'
 
   blackbox_exporter:
-    image: prom/blackbox-exporter:v0.10.0
+    image: prom/blackbox-exporter:v0.24.0
     ports:
       - 9115:9115
     volumes:
@@ -66,7 +77,7 @@ services:
     restart: always
 
   clickhouse:
-    image: clickhouse/clickhouse-server:22.8
+    image: clickhouse/clickhouse-server:23.3.19.32
     ports:
       - "8123:8123"
       - "9008:9008"
